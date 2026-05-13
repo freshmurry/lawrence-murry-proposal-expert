@@ -9,8 +9,8 @@
         <!-- WARNING: Do not use cdn.tailwindcss.com in production. Use Tailwind CLI or PostCSS for production builds. -->
         <script src="https://cdn.tailwindcss.com"></script>
         <!-- Chart.js for analytics charts -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
+        < src="https://cdn.jsdelivr.net/npm/chart.js"></>
+        <>
             tailwind.config = {
                 darkMode: 'class'
             }
@@ -277,437 +277,151 @@
         </div>
 
         <script>
-            // Load visitor data
-            async function loadVisitorData() {
-                try {
-                    const response = await fetch('/api/visitors?debug=true');
-                    const data = await response.json();
-                    
-                    // Display total visitors
-                    const totalCount = data.visitor_count || 0;
-                    document.getElementById('totalVisitors').textContent = totalCount;
-                    
-                    // Display recent visitors
-                    const visitorsList = data.visitors_list ? JSON.parse(data.visitors_list) : [];
-                    const recentVisitors = visitorsList.slice(-5).reverse();
-                    
-                    const recentHtml = recentVisitors.map(visitor => `
-                        <div class="flex justify-between items-center py-2 border-b dark:border-gray-700">
-                            <div>
-                                <div class="font-medium">${visitor.city || 'Unknown'}, ${visitor.country || 'Unknown'}</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">${visitor.ip}</div>
-                            </div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">
-                                ${new Date(visitor.lastVisit).toLocaleDateString()}
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    document.getElementById('recentVisitors').innerHTML = recentHtml || 'No visitors yet';
-                    
-                    // Display all visitors in table
-                    const tableHtml = visitorsList.map(visitor => `
-                        <tr class="border-b dark:border-gray-700">
-                            <td class="py-2 font-mono text-xs">${visitor.ip}</td>
-                            <td class="py-2">${visitor.city || 'Unknown'}, ${visitor.region || ''} ${visitor.zip || ''} ${visitor.country || 'Unknown'}</td>
-                            <td class="py-2">${new Date(visitor.firstVisit).toLocaleString()}</td>
-                            <td class="py-2">${new Date(visitor.lastVisit).toLocaleString()}</td>
-                            <td class="py-2">
-                                <button onclick="showVisitorDetails('${JSON.stringify(visitor).replace(/'/g, "\\'")}')" 
-                                        class="text-blue-500 hover:text-blue-700 text-xs">
-                                    View Details
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('');
-                    
-                    document.getElementById('visitorsTable').innerHTML = tableHtml || '<tr><td colspan="5" class="py-4 text-center">No visitors yet</td></tr>';
-                    
-                } catch (error) {
-                    console.error('Error loading visitor data:', error);
-                    document.getElementById('totalVisitors').textContent = 'Error loading data';
+        /* ===========================
+           REAL-TIME ANALYTICS LOADER
+        =========================== */
+        
+        async function loadAnalyticsData() {
+          try {
+            const res = await fetch('/api/analytics?type=all', { cache: 'no-store' });
+            if (!res.ok) throw new Error('Analytics API error');
+            const data = await res.json();
+        
+            /* ---- KPI CARDS ---- */
+            document.getElementById('totalVisitors').textContent = data.realtime?.totalVisitors ?? 0;
+        
+            const today = data.uniqueVisitors?.byDay?.slice(-1)[0];
+            document.getElementById('totalVisitorsToday').textContent = today?.count ?? 0;
+        
+            document.getElementById('currentlyOnline').textContent = data.realtime?.currentlyOnline ?? 0;
+            document.getElementById('activeLastHour').textContent = data.realtime?.activeLastHour ?? 0;
+            document.getElementById('activeLastDay').textContent = data.realtime?.activeLastDay ?? 0;
+        
+            const avg = data.engagement?.avgSessionDuration ?? 0;
+            document.getElementById('avgSessionDuration').textContent =
+              `${Math.floor(avg / 60)}m ${avg % 60}s`;
+        
+            document.getElementById('bounceRate').textContent =
+              `${data.engagement?.bounceRate ?? 0}%`;
+        
+            document.getElementById('returnRate').textContent =
+              `${data.engagement?.returnRate ?? 0}%`;
+        
+            document.getElementById('totalSessions').textContent =
+              data.engagement?.totalSessions ?? 0;
+        
+            /* ---- HOURLY CHART ---- */
+            if (data.temporal?.hourly?.length) {
+              window.hourlyChartInstance?.destroy();
+              window.hourlyChartInstance = new Chart(
+                document.getElementById('hourlyChart'),
+                {
+                  type: 'line',
+                  data: {
+                    labels: data.temporal.hourly.map(h => `${h.hour}:00`),
+                    datasets: [{
+                      label: 'Visitors',
+                      data: data.temporal.hourly.map(h => h.count),
+                      borderColor: '#8B5CF6',
+                      tension: 0.4
+                    }]
+                  },
+                  options: { responsive: true }
                 }
+              );
             }
-            
-            // Load raw KV data
-            async function loadRawData() {
-                try {
-                    const response = await fetch('/api/visitors?debug=true');
-                    const data = await response.json();
-                    document.getElementById('rawData').textContent = JSON.stringify(data, null, 2);
-                } catch (error) {
-                    console.error('Error loading raw data:', error);
-                    document.getElementById('rawData').textContent = 'Error loading raw data';
-                }
-            }
-            
-            // Load headers data
-            async function loadHeaders() {
-                try {
-                    const response = await fetch('/api/visitors?headers=true');
-                    const data = await response.json();
-                    document.getElementById('headersData').textContent = JSON.stringify(data, null, 2);
-                } catch (error) {
-                    console.error('Error loading headers:', error);
-                    document.getElementById('headersData').textContent = 'Error loading headers';
-                }
-            }
-            
-            // Test geolocation
-            async function testGeolocation() {
-                try {
-                    // First get headers
-                    const headersResponse = await fetch('/api/visitors?headers=true');
-                    const headers = await headersResponse.json();
-                    
-                    // Show geolocation-specific headers
-                    const geoHeaders = {};
-                    Object.keys(headers).forEach(key => {
-                        if (key.startsWith('CF-IP')) {
-                            geoHeaders[key] = headers[key];
-                        }
-                    });
-                    
-                    document.getElementById('headersData').textContent = 
-                        'Geolocation Headers:\n' + JSON.stringify(geoHeaders, null, 2) + 
-                        '\n\nAll Headers:\n' + JSON.stringify(headers, null, 2);
-                } catch (error) {
-                    console.error('Error testing geolocation:', error);
-                    document.getElementById('headersData').textContent = 'Error testing geolocation';
-                }
-            }
-            
-            // Clear KV data
-            async function clearKVData() {
-                if (!confirm('Are you sure you want to clear all KV data? This cannot be undone.')) {
-                    return;
-                }
-                
-                try {
-                    const response = await fetch('/api/clear-kv?clear=true');
-                    const data = await response.json();
-                    document.getElementById('rawData').textContent = JSON.stringify(data, null, 2);
-                    alert('KV data cleared successfully!');
-                    loadVisitorData(); // Refresh the display
-                } catch (error) {
-                    console.error('Error clearing KV data:', error);
-                    document.getElementById('rawData').textContent = 'Error clearing KV data: ' + error.message;
-                }
-            }
-            
-            // Test new system
-            async function testNewSystem() {
-                try {
-                    const response = await fetch('/api/clear-kv?test=true');
-                    const data = await response.json();
-                    document.getElementById('rawData').textContent = JSON.stringify(data, null, 2);
-                    alert('New system test completed! Check the raw data below.');
-                    loadVisitorData(); // Refresh the display
-                } catch (error) {
-                    console.error('Error testing new system:', error);
-                    document.getElementById('rawData').textContent = 'Error testing new system: ' + error.message;
-                }
-            }
-            
-            // Show visitor details
-            function showVisitorDetails(visitorJson) {
-                const visitor = JSON.parse(visitorJson);
-                alert(`Visitor Details:\n\n` +
-                    `IP: ${visitor.ip}\n` +
-                    `City: ${visitor.city || 'Unknown'}\n` +
-                    `Region: ${visitor.region || 'Unknown'}\n` +
-                    `Country: ${visitor.country || 'Unknown'}\n` +
-                    `ZIP: ${visitor.zip || 'Unknown'}\n` +
-                    `Latitude: ${visitor.latitude || 'Unknown'}\n` +
-                    `Longitude: ${visitor.longitude || 'Unknown'}\n` +
-                    `Timezone: ${visitor.timezone || 'Unknown'}\n` +
-                    `Continent: ${visitor.continent || 'Unknown'}\n` +
-                    `First Visit: ${new Date(visitor.firstVisit).toLocaleString()}\n` +
-                    `Last Visit: ${new Date(visitor.lastVisit).toLocaleString()}`);
-            }
-            
-            // Only keep the robust analytics script for dashboard cards/charts
-            async function loadAnalyticsData() {
-                try {
-                    const response = await fetch('/api/analytics?type=all');
-                    const data = await response.json();
-
-                    // Update cards
-                    document.getElementById('totalVisitors').textContent = data.realtime.totalVisitors || 0;
-                    // Today: use uniqueVisitors.byDay (last entry is today)
-                    const todayUnique = data.uniqueVisitors.byDay[data.uniqueVisitors.byDay.length - 1];
-                    document.getElementById('totalVisitorsToday').textContent = todayUnique ? todayUnique.count : 0;
-                    document.getElementById('currentlyOnline').textContent = data.realtime.currentlyOnline || 0;
-                    document.getElementById('activeLastHour').textContent = data.realtime.activeLastHour || 0;
-                    document.getElementById('activeLastDay').textContent = data.realtime.activeLastDay || 0;
-                    document.getElementById('avgSessionDuration').textContent = (data.engagement && typeof data.engagement.avgSessionDuration !== 'undefined') ? `${Math.floor(data.engagement.avgSessionDuration/60)}m ${data.engagement.avgSessionDuration%60}s` : '0m 0s';
-                    document.getElementById('bounceRate').textContent = (data.engagement && typeof data.engagement.bounceRate !== 'undefined') ? `${data.engagement.bounceRate}%` : '0%';
-                    document.getElementById('returnRate').textContent = (data.engagement && typeof data.engagement.returnRate !== 'undefined') ? `${data.engagement.returnRate}%` : '0%';
-                    document.getElementById('totalSessions').textContent = data.engagement.totalSessions || 0;
-
-                    // Hourly Traffic Chart
-                    if (window.hourlyChartInstance) window.hourlyChartInstance.destroy();
-                    const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
-                    window.hourlyChartInstance = new Chart(hourlyCtx, {
-                        type: 'line',
-                        data: {
-                            labels: data.temporal.hourly.map(d => `${d.hour}:00`),
-                            datasets: [{
-                                label: 'Visitors',
-                                data: data.temporal.hourly.map(d => d.count),
-                                borderColor: '#8B5CF6',
-                                backgroundColor: 'rgba(139,92,246,0.1)',
-                                tension: 0.4
-                            }]
-                        },
-                        options: { responsive: true, scales: { y: { beginAtZero: true } } }
-                    });
-
-                    // Daily Traffic Chart
-                    if (window.dailyChartInstance) window.dailyChartInstance.destroy();
-                    const dailyCtx = document.getElementById('dailyChart').getContext('2d');
-                    window.dailyChartInstance = new Chart(dailyCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: data.temporal.daily.map(d => d.day),
-                            datasets: [{
-                                label: 'Visitors',
-                                data: data.temporal.daily.map(d => d.count),
-                                backgroundColor: '#10B981'
-                            }]
-                        },
-                        options: { responsive: true, scales: { y: { beginAtZero: true } } }
-                    });
-
-                    // Monthly Traffic Chart
-                    if (window.monthlyChartInstance) window.monthlyChartInstance.destroy();
-                    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-                    window.monthlyChartInstance = new Chart(monthlyCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: data.temporal.monthly.map(d => d.month),
-                            datasets: [{
-                                label: 'Visitors',
-                                data: data.temporal.monthly.map(d => d.count),
-                                backgroundColor: '#3B82F6'
-                            }]
-                        },
-                        options: { responsive: true, scales: { y: { beginAtZero: true } } }
-                    });
-
-                    // Device Types Chart
-                    if (window.devicesChartInstance) window.devicesChartInstance.destroy();
-                    const devicesCtx = document.getElementById('devicesChart').getContext('2d');
-                    window.devicesChartInstance = new Chart(devicesCtx, {
-                        type: 'pie',
-                        data: {
-                            labels: data.technical.devices.map(d => d.device),
-                            datasets: [{
-                                label: 'Devices',
-                                data: data.technical.devices.map(d => d.count),
-                                backgroundColor: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6']
-                            }]
-                        },
-                        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-                    });
-
-                    // Browser Distribution Chart
-                    if (window.browsersChartInstance) window.browsersChartInstance.destroy();
-                    const browsersCtx = document.getElementById('browsersChart').getContext('2d');
-                    window.browsersChartInstance = new Chart(browsersCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: data.technical.browsers.map(d => d.browser),
-                            datasets: [{
-                                label: 'Users',
-                                data: data.technical.browsers.map(d => d.count),
-                                backgroundColor: '#F59E0B'
-                            }]
-                        },
-                        options: { responsive: true, scales: { y: { beginAtZero: true } } }
-                    });
-
-                    // Unique Visitors by Day Chart
-                    if (window.uniqueDayChartInstance) window.uniqueDayChartInstance.destroy();
-                    const uniqueDayCtx = document.getElementById('uniqueDayChart').getContext('2d');
-                    window.uniqueDayChartInstance = new Chart(uniqueDayCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: data.uniqueVisitors.byDay.map(d => d.period),
-                            datasets: [{
-                                label: 'Unique Visitors',
-                                data: data.uniqueVisitors.byDay.map(d => d.count),
-                                backgroundColor: '#6366F1'
-                            }]
-                        },
-                        options: { responsive: true, scales: { y: { beginAtZero: true } } }
-                    });
-
-                    // SEO/Keyword Tracking Table
-                    const seoKeywordsTable = document.getElementById('seoKeywordsTable');
-                    if (seoKeywordsTable) {
-                        if (data.seoKeywords && data.seoKeywords.length > 0) {
-                            seoKeywordsTable.innerHTML = data.seoKeywords.map(k => `<tr><td class='py-2'>${k.keyword}</td><td class='py-2'>${k.engine}</td><td class='py-2'>${k.count}</td></tr>`).join('');
-                        } else {
-                            seoKeywordsTable.innerHTML = `<tr><td colspan='3' class='py-2 text-center text-gray-500'>No keyword data yet</td></tr>`;
-                        }
-                    }
-
-                } catch (error) {
-                    console.error('Error loading analytics:', error);
-                    document.getElementById('totalVisitors').textContent = 'Error loading data';
-                }
-            }
-            
-            // Load data on page load
-            loadAnalyticsData();
-        </script>
-        <!-- Load and render raw visitors table -->
-        <script>
-            let _rawVisitorsList = [];
-            let _rawVisitorsFiltered = [];
-            let _rawVisitorsSortBy = 'lastVisit';
-            let _rawVisitorsFilterBy = 'none';
-            let _rawVisitorsFilterValue = '';
-
-            document.getElementById('rawSortBy').addEventListener('change', e => {
-                _rawVisitorsSortBy = e.target.value;
-                renderRawVisitorsTable();
-            });
-            document.getElementById('rawFilterBy').addEventListener('change', e => {
-                _rawVisitorsFilterBy = e.target.value;
-                const show = _rawVisitorsFilterBy !== 'none';
-                document.getElementById('rawFilterValueContainer').style.display = show ? '' : 'none';
-                if (!show) _rawVisitorsFilterValue = '';
-                renderRawVisitorsTable();
-            });
-            document.getElementById('rawFilterValue').addEventListener('input', e => {
-                _rawVisitorsFilterValue = e.target.value;
-                renderRawVisitorsTable();
-            });
-
-            async function loadRawVisitorsTable() {
-                try {
-                    const response = await fetch('/api/visitors?raw_visitors_list=true');
-                    const data = await response.json();
-                    _rawVisitorsList = data.visitors_list || [];
-                    window._allVisitorHeaders = _rawVisitorsList.map(v => v.allHeaders || {});
-                    renderRawVisitorsTable();
-                } catch (error) {
-                    document.getElementById('rawVisitorsTable').innerHTML = '<tr><td colspan="8" class="py-4 text-center text-red-500">Error loading data</td></tr>';
-                }
-            }
-
-            function renderRawVisitorsTable() {
-                // Filter
-                _rawVisitorsFiltered = _rawVisitorsList.filter(v => {
-                    if (_rawVisitorsFilterBy === 'none' || !_rawVisitorsFilterValue) return true;
-                    const val = _rawVisitorsFilterValue.toLowerCase();
-                    if (_rawVisitorsFilterBy === 'ip') return (v.ip || '').toLowerCase().includes(val);
-                    if (_rawVisitorsFilterBy === 'city') return (v.city || '').toLowerCase().includes(val);
-                    if (_rawVisitorsFilterBy === 'country') return (v.country || '').toLowerCase().includes(val);
-                    return true;
-                });
-                // Sort
-                _rawVisitorsFiltered.sort((a, b) => {
-                    if (_rawVisitorsSortBy === 'lastVisit') return new Date(b.lastVisit) - new Date(a.lastVisit);
-                    if (_rawVisitorsSortBy === 'firstVisit') return new Date(b.firstVisit) - new Date(a.firstVisit);
-                    if (_rawVisitorsSortBy === 'ip') return (a.ip || '').localeCompare(b.ip || '');
-                    if (_rawVisitorsSortBy === 'city') return (a.city || '').localeCompare(b.city || '');
-                    if (_rawVisitorsSortBy === 'country') return (a.country || '').localeCompare(b.country || '');
-                    return 0;
-                });
-                // Render
-                const tableHtml = _rawVisitorsFiltered.map((visitor, idx) => `
-                    <tr class="border-b dark:border-gray-700">
-                        <td class="py-2 font-mono text-xs">${visitor.ip}</td>
-                        <td class="py-2">${visitor.city || ''}</td>
-                        <td class="py-2">${visitor.state || visitor.region || ''}</td>
-                        <td class="py-2">${visitor.country || ''}</td>
-                        <td class="py-2">${visitor.zip || ''}</td>
-                        <td class="py-2">${visitor.firstVisit ? new Date(visitor.firstVisit).toLocaleString() : ''}</td>
-                        <td class="py-2">${visitor.lastVisit ? new Date(visitor.lastVisit).toLocaleString() : ''}</td>
-                        <td class="py-2">
-                            <button onclick="showHeadersModal(${idx})" class="text-blue-500 hover:text-blue-700 text-xs">View</button>
-                        </td>
-                    </tr>
-                `).join('');
-                document.getElementById('rawVisitorsTable').innerHTML = tableHtml || '<tr><td colspan="8" class="py-4 text-center">No visitors yet</td></tr>';
-            }
-
-            function exportRawVisitorsCSV() {
-                if (!_rawVisitorsFiltered.length) return;
-                const header = ['IP','City','State','Country','ZIP','First Visit','Last Visit'];
-                const rows = _rawVisitorsFiltered.map(v => [
-                    v.ip, v.city, v.state, v.country, v.zip,
-                    v.firstVisit ? new Date(v.firstVisit).toLocaleString() : '',
-                    v.lastVisit ? new Date(v.lastVisit).toLocaleString() : ''
-                ]);
-                const csv = [header, ...rows].map(r => r.map(x => '"'+(x||'')+'"').join(',')).join('\n');
-                const blob = new Blob([csv], {type: 'text/csv'});
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'raw_visitors.csv';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-
-            function showHeadersModal(idx) {
-                const visitor = _rawVisitorsFiltered[idx] || {};
-                const headers = window._allVisitorHeaders && window._allVisitorHeaders[idx] ? window._allVisitorHeaders[idx] : {};
-                // Show summary
-                document.getElementById('headersModalSummary').innerHTML = `
-                    <div><b>IP:</b> ${visitor.ip || ''}</div>
-                    <div><b>City:</b> ${visitor.city || ''}</div>
-                    <div><b>State:</b> ${visitor.state || visitor.region || ''}</div>
-                    <div><b>Country:</b> ${visitor.country || ''}</div>
-                    <div><b>ZIP:</b> ${visitor.zip || ''}</div>
-                    <div><b>First Visit:</b> ${visitor.firstVisit ? new Date(visitor.firstVisit).toLocaleString() : ''}</div>
-                    <div><b>Last Visit:</b> ${visitor.lastVisit ? new Date(visitor.lastVisit).toLocaleString() : ''}</div>
-                `;
-                document.getElementById('headersModalContent').textContent = JSON.stringify(headers, null, 2);
-                document.getElementById('headersModal').classList.remove('hidden');
-            }
-            function closeHeadersModal() {
-                document.getElementById('headersModal').classList.add('hidden');
-            }
-            function copyHeadersToClipboard() {
-                const text = document.getElementById('headersModalContent').textContent;
-                navigator.clipboard.writeText(text);
-                alert('Headers copied to clipboard!');
-            }
-            // Load on page load
-            loadRawVisitorsTable();
-        </script>
-        <!-- Load and render recent visitors card (using raw visitors for now) -->
-        <script>
-            async function loadRecentVisitorsCard() {
-                try {
-                    const response = await fetch('/api/visitors?debug=true');
-                    const data = await response.json();
-                    const visitorsList = data.visitors_list ? JSON.parse(data.visitors_list) : [];
-                    const recentVisitors = visitorsList.slice(-5).reverse();
-                    const recentHtml = recentVisitors.map(visitor => `
-                        <div class="flex justify-between items-center py-2 border-b dark:border-gray-700">
-                            <div>
-                                <div class="font-medium">${visitor.city || 'Unknown'}, ${visitor.country || 'Unknown'}</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">${visitor.ip}</div>
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">
-                                ${visitor.lastVisit ? new Date(visitor.lastVisit).toLocaleString() : ''}
-                            </div>
-                        </div>
-                    `).join('');
-                    document.getElementById('recentVisitors').innerHTML = recentHtml || '<div class="text-gray-500 text-center">No visitors yet</div>';
-                } catch (error) {
-                    document.getElementById('recentVisitors').innerHTML = '<div class="text-red-500 text-center">Error loading recent visitors</div>';
-                }
-            }
-            // Load on page load
-            loadRecentVisitorsCard();
+        
+          } catch (err) {
+            console.error('Analytics load failed:', err);
+          }
+        }
+        
+        /* ===========================
+           RAW VISITOR DATA (REAL)
+        =========================== */
+        
+        let _rawVisitorsList = [];
+        let _rawVisitorsFiltered = [];
+        
+        async function loadRawVisitorsTable() {
+          try {
+            const res = await fetch('/api/visitors?raw_visitors_list=true', { cache: 'no-store' });
+            if (!res.ok) throw new Error('Visitor API error');
+            const data = await res.json();
+        
+            const visitors = Array.isArray(data.visitors_list)
+              ? data.visitors_list
+              : JSON.parse(data.visitors_list || '[]');
+        
+            _rawVisitorsList = visitors;
+            window._allVisitorHeaders = visitors.map(v => v.allHeaders || {});
+            renderRawVisitorsTable();
+        
+          } catch (err) {
+            console.error(err);
+            document.getElementById('rawVisitorsTable').innerHTML =
+              `<tr><td colspan="8" class="py-4 text-center text-red-500">Failed to load visitors</td></tr>`;
+          }
+        }
+        
+        function renderRawVisitorsTable() {
+          _rawVisitorsFiltered = [..._rawVisitorsList];
+        
+          const html = _rawVisitorsFiltered.map((v, i) => `
+            <tr class="border-b dark:border-gray-700">
+              <td class="py-2 font-mono text-xs">${v.ip || ''}</td>
+              <td class="py-2">${v.city || ''}</td>
+              <td class="py-2">${v.region || ''}</td>
+              <td class="py-2">${v.country || ''}</td>
+              <td class="py-2">${v.zip || ''}</td>
+              <td class="py-2">${v.firstVisit ? new Date(v.firstVisit).toLocaleString() : ''}</td>
+              <td class="py-2">${v.lastVisit ? new Date(v.lastVisit).toLocaleString() : ''}</td>
+              <td class="py-2">
+                <button onclick="showHeadersModal(${i})"
+                  class="text-blue-500 hover:text-blue-700 text-xs">View</button>
+              </td>
+            </tr>
+          `).join('');
+        
+          document.getElementById('rawVisitorsTable').innerHTML =
+            html || `<tr><td colspan="8" class="py-4 text-center">No data</td></tr>`;
+        }
+        
+        /* ===========================
+           HEADERS MODAL
+        =========================== */
+        
+        function showHeadersModal(idx) {
+          const visitor = _rawVisitorsFiltered[idx] || {};
+          const headers = window._allVisitorHeaders?.[idx] || {};
+        
+          document.getElementById('headersModalSummary').innerHTML = `
+            <div><b>IP:</b> ${visitor.ip || ''}</div>
+            <div><b>City:</b> ${visitor.city || ''}</div>
+            <div><b>Country:</b> ${visitor.country || ''}</div>
+            <div><b>Last Visit:</b> ${visitor.lastVisit ? new Date(visitor.lastVisit).toLocaleString() : ''}</div>
+          `;
+        
+          document.getElementById('headersModalContent').textContent =
+            JSON.stringify(headers, null, 2);
+        
+          document.getElementById('headersModal').classList.remove('hidden');
+        }
+        
+        function closeHeadersModal() {
+          document.getElementById('headersModal').classList.add('hidden');
+        }
+        
+        /* ===========================
+           INIT + REAL-TIME POLLING
+        =========================== */
+        
+        loadAnalyticsData();
+        loadRawVisitorsTable();
+        
+        // ✅ real-time refresh
+        setInterval(loadAnalyticsData, 15000);
+        setInterval(loadRawVisitorsTable, 20000);
         </script>
     </body>
 </html>
