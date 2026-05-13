@@ -177,8 +177,7 @@ The website is optimized for:
 ## 📞 Contact
 
 For questions about this website or to request similar work:
-- **Email**: lawrencemurry@yahoo.com
-- **LinkedIn**: https://www.linkedin.com/in/lawrence-murry/
+- **LinkedIn**: https://www.linkedin.com/in/lawrence-murry-proposal-expert/
 - **GitHub**: https://github.com/freshmurry
 
 ---
