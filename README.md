@@ -1,183 +1,104 @@
-# Lawrence Murry - Senior Proposal Manager Resume Website
+# Lawrence Murry — Proposal Expert
 
-A professional, responsive resume website showcasing Lawrence Murry's expertise as a Expert Enterprise B2B SaaS Proposal Professional.
+Professional portfolio and resume website for Lawrence Murry,
+Senior Proposal Manager and Enterprise B2B SaaS Proposal Professional.
 
-## 🚀 Features
+## Website
 
-### SEO Optimizations
-- **Comprehensive Meta Tags**: Enhanced Open Graph, Twitter Cards, and structured data
-- **Sitemap.xml**: Automatically generated sitemap for search engines
-- **Robots.txt**: Proper crawling instructions for search engines
-- **Structured Data**: JSON-LD schema markup for rich snippets
-- **Canonical URLs**: Prevents duplicate content issues
-- **Mobile-First Design**: Responsive design with proper viewport settings
+https://lawrencemurry.com
 
-### Performance & PWA Features
-- **Service Worker**: Offline functionality and caching
-- **Progressive Web App**: Installable on mobile devices
-- **Lazy Loading**: Images load as needed for better performance
-- **Optimized CSS**: Minified and efficient styling
-- **Fast Loading**: Optimized assets and delivery
+## Purpose
 
-### Dynamic Features
-- **Smooth Scrolling**: Animated navigation between sections
-- **Intersection Observer**: Elements animate as they come into view
-- **Scroll to Top**: Floating button for easy navigation
-- **Interactive Cards**: Hover effects and animations
-- **Skill Tags**: Dynamic styling for skills and competencies
-- **Loading States**: Visual feedback for user interactions
+The site presents Lawrence Murry's:
 
-### Accessibility
-- **ARIA Labels**: Proper accessibility attributes
-- **Keyboard Navigation**: Full keyboard support
-- **Focus Management**: Clear focus indicators
-- **High Contrast Support**: Respects user preferences
-- **Reduced Motion**: Respects motion sensitivity preferences
+- Proposal management experience
+- Enterprise and SaaS proposal expertise
+- Government and federal RFP experience
+- CF APMP certification
+- Professional development
+- Resume and supporting materials
+- Testimonials
+- Selected web projects
+- Teams Stay Green eBook
 
-### Responsive Design
-- **Mobile-First**: Optimized for all screen sizes
-- **Flexible Grid**: CSS Grid and Flexbox layouts
-- **Touch-Friendly**: Proper touch targets for mobile
-- **Print Styles**: Optimized for printing
+## Technology
 
-## 📁 File Structure
-
-```
-resume-master/
-├── index.html              # Main resume page
-├── testimonials.html       # Testimonials page
-├── ecommerce.html          # E-commerce template
-├── styles.css              # Main stylesheet
-├── sw.js                   # Service worker
-├── manifest.json           # PWA manifest
-├── sitemap.xml            # SEO sitemap
-├── robots.txt             # Search engine instructions
-├── ads.txt                # Ad verification
-├── CNAME                  # Custom domain
-├── img/                   # Images directory
-│   ├── lawrence-murry-senior-proposal-manager.jpg
-│   ├── lawrence-murry.jpg
-│   └── certificates/
-└── Proposal-Manager-Resume-Lawrence-Murry.pdf
-```
-
-## 🛠 Technical Stack
-
-- **HTML5**: Semantic markup with modern features
-- **CSS3**: Flexbox, Grid, animations, and responsive design
-- **JavaScript (ES6+)**: Modern JavaScript with async/await
-- **Service Workers**: Offline functionality and caching
-- **PWA**: Progressive Web App capabilities
-- **SEO**: Comprehensive search engine optimization
-
-## 🎨 Design Features
-
-### Color Scheme
-- **Primary**: #660000 (Deep Red)
-- **Secondary**: #800000 (Dark Red)
-- **Accent**: #f0f0f0 (Light Gray)
-- **Text**: #333333 (Dark Gray)
-
-### Typography
-- **Primary Font**: Roboto (Google Fonts)
-- **Fallback**: Sans-serif
-- **Responsive**: Scalable font sizes
-
-### Animations
-- **Fade In**: Elements appear smoothly
-- **Slide In**: Horizontal slide animations
-- **Hover Effects**: Interactive feedback
-- **Loading States**: Visual feedback for actions
-
-## 📱 Mobile Features
-
-- **Touch Optimized**: Large touch targets
-- **Swipe Navigation**: Mobile-friendly navigation
-- **Fast Loading**: Optimized for mobile networks
-- **Offline Support**: Works without internet connection
-- **Installable**: Can be added to home screen
-
-## 🔧 Browser Support
-
-- **Chrome**: 60+
-- **Firefox**: 55+
-- **Safari**: 12+
-- **Edge**: 79+
-- **Mobile Browsers**: iOS Safari, Chrome Mobile
-
-## 🚀 Performance Metrics
-
-- **Lighthouse Score**: 90+ (Performance, Accessibility, Best Practices, SEO)
-- **PageSpeed Insights**: 90+ (Mobile and Desktop)
-- **Core Web Vitals**: Optimized for LCP, FID, and CLS
-
-## 📈 SEO Features
-
-### On-Page SEO
-- Optimized title tags and meta descriptions
-- Proper heading hierarchy (H1-H6)
-- Alt text for all images
-- Internal linking structure
-- Schema markup for rich snippets
-
-### Technical SEO
+- HTML5
+- CSS / Tailwind CSS
+- JavaScript
+- Cloudflare Pages
+- Cloudflare Pages Functions
+- Google Analytics
+- JSON-LD structured data
 - XML sitemap
-- Robots.txt file
+- robots.txt
+- PWA/service-worker functionality
+
+## Repository Structure
+
+functions/          Cloudflare Pages Functions
+js/                 Client-side JavaScript
+img/                Images and certificates
+index.html          Main website
+testimonials.html   Testimonials
+privacy.html        Privacy policy
+success.html        Payment success page
+teamsstaygreen.html eBook sales page
+manifest.json       PWA manifest
+sw.js               Service worker
+sitemap.xml         XML sitemap
+robots.txt          Search-engine directives
+_headers            HTTP security headers
+_redirects          Redirect rules
+wrangler.toml       Cloudflare configuration
+Proposal-Manager-Resume-Lawrence-Murry.pdf
+docs/               Project documentation
+
+## Deployment
+
+The production deployment target is Cloudflare Pages.
+
+See:
+
+- docs/DEPLOYMENT.md
+- docs/SEO-CHECKLIST.md
+
+## SEO
+
+The site includes:
+
 - Canonical URLs
-- Mobile-friendly design
-- Fast loading times
+- Open Graph metadata
+- Twitter metadata
+- JSON-LD structured data
+- Sitemap
+- robots.txt
+- Responsive/mobile-first design
+- Semantic HTML
+- Image alt text
 
-### Local SEO
-- Location-based keywords
-- Professional certifications
-- Industry-specific terminology
-- Local business information
+## Security
 
-## 🎯 Target Keywords
+Production administrative and diagnostic endpoints must not be publicly
+accessible.
 
-- Senior Proposal Manager
-- CF APMP
-- Cloud SaaS Proposals
-- Government RFP
-- Federal Proposals
-- Enterprise Proposals
-- Proposal Management
-- RFP Lifecycle
-- Technical Proposals
+Visitor analytics containing IP addresses, location data, request headers,
+or other potentially sensitive information must be protected by
+authentication/access controls.
 
-## 📊 Analytics Integration
+## Development
 
-- **Google Analytics**: Track user behavior and conversions
-- **Google Search Console**: Monitor search performance
-- **Custom Events**: Track specific user interactions
+Make changes in a feature branch and verify:
 
-## 🔒 Security Features
+- Main page loads correctly
+- Navigation works
+- Forms work
+- Cloudflare Functions respond correctly
+- Payment flow works
+- Sitemap and robots.txt remain valid
+- No test/admin pages are publicly indexable
 
-- **HTTPS**: Secure connections
-- **Content Security Policy**: XSS protection
-- **Secure Headers**: Additional security measures
-- **Input Validation**: Client-side validation
+## License
 
-## 📝 Content Management
-
-The website is designed to be easily maintainable:
-- **Modular CSS**: Organized stylesheets
-- **Component-Based**: Reusable HTML components
-- **Version Control**: Git-based development
-- **Documentation**: Comprehensive README
-
-## 🚀 Deployment
-
-The website is optimized for:
-- **GitHub Pages**: Free hosting
-- **Cloudflare Pages**: Global CDN
-
-## 📞 Contact
-
-For questions about this website or to request similar work:
-- **LinkedIn**: https://www.linkedin.com/in/lawrence-murry-proposal-expert/
-- **GitHub**: https://github.com/freshmurry
-
----
-
-*Last updated: January 2025*
+[Add the appropriate license or state that this repository is not licensed
+for redistribution.]
