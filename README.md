@@ -1,6 +1,6 @@
 # Lawrence Murry - Senior Proposal Manager Resume Website
 
-A professional, responsive resume website showcasing Lawrence Murry's expertise as a Senior Proposal Manager and Cloud SaaS expert.
+A professional, responsive resume website showcasing Lawrence Murry's expertise as a Expert Enterprise B2B SaaS Proposal Professional.
 
 ## 🚀 Features
 
