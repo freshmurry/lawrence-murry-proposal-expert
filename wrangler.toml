@@ -6,3 +6,7 @@ compatibility_date = "2026-09-06"
 [assets]
 directory = "./public"
 binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "VISITOR_COUNTER"
+id = "de56e38c534b4f2c87d070f8ae047ecc"

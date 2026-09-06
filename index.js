@@ -108,6 +108,36 @@ async function handleRequest(
     );
   }
 
+  if (url.pathname === "/api/kv") {
+    if (!env.VISITOR_COUNTER) {
+      return json(
+        {
+          error:
+            "KV namespace binding is not configured",
+        },
+        503,
+      );
+    }
+
+    await env.VISITOR_COUNTER.put(
+      "KEY",
+      "VALUE",
+    );
+
+    const value =
+      await env.VISITOR_COUNTER.get("KEY");
+
+    const allKeys =
+      await env.VISITOR_COUNTER.list();
+
+    await env.VISITOR_COUNTER.delete("KEY");
+
+    return json({
+      value,
+      allKeys,
+    });
+  }
+
   /*
    * Health endpoint.
    *
