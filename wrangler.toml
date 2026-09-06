@@ -1,0 +1,8 @@
+name = "lawrence-murry"
+main = "index.js"
+compatibility_date = "2026-09-06"
+
+# Cloudflare serves files in this directory through env.ASSETS.
+[assets]
+directory = "./"
+binding = "ASSETS"
