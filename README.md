@@ -170,8 +170,6 @@ The website is designed to be easily maintainable:
 
 The website is optimized for:
 - **GitHub Pages**: Free hosting
-- **Netlify**: Static site hosting
-- **Vercel**: Edge deployment
 - **Cloudflare Pages**: Global CDN
 
 ## 📞 Contact
