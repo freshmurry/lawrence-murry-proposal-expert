@@ -1,11 +1,11 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  X-XSS-Protection: 1; mode=block
 
 # Allow search engines
 /robots.txt
   Cache-Control: public, max-age=3600
+  Content-Type: text/plain; charset=UTF-8
 
 /sitemap.xml
   Cache-Control: public, max-age=3600

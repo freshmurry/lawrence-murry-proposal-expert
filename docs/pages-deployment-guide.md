@@ -1,4 +1,4 @@
-# Cloudflare Pages Deployment Guide
+# Cloudflare Workers Deployment Guide
 
 This guide will help you deploy your resume website to Cloudflare Pages with dynamic weather and visitor functionality.
 
@@ -192,4 +192,6 @@ Your site now has these API endpoints:
 
 ---
 
-Your resume website is now live with dynamic weather and visitor functionality! The site will automatically update weather data and track visitors using Cloudflare's edge infrastructure. 
+The site is deployed as a Cloudflare Worker with Workers Static Assets. Static files are served from `public/`, while `index.js` handles health checks, canonical redirects, API routes implemented by the Worker, and clean 404 responses.
+
+The `functions/` directory contains legacy Pages Function sources and is not automatically registered as routes by the current Worker entry point. Any endpoint required in production must be implemented or explicitly routed from `index.js`.

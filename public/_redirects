@@ -1,6 +1,1 @@
-# Ensure proper routing
 /index.html / 301
-/testimonials.html /testimonials 301
-
-# Allow all user agents including search engines
-/* 200 

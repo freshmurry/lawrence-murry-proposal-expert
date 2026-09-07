@@ -26,8 +26,8 @@ The site presents Lawrence Murry's:
 - HTML5
 - CSS / Tailwind CSS
 - JavaScript
-- Cloudflare Pages
-- Cloudflare Pages Functions
+- Cloudflare Workers
+- Workers Static Assets
 - Google Analytics
 - JSON-LD structured data
 - XML sitemap
@@ -38,23 +38,23 @@ The site presents Lawrence Murry's:
 
 ```text
 /
-├── functions/                         # Cloudflare Pages Functions
-├── js/                                # Client-side JavaScript
-├── img/                               # Images and certificates
+├── functions/                         # Legacy Pages Function sources
+├── js/                                # Client-side JavaScript sources
+├── public/                            # Workers Static Assets directory
+│   ├── _headers                        # Static response headers
+│   ├── _redirects                       # Static redirects
+│   ├── index.html                      # Main website
+│   ├── testimonials.html               # Testimonials
+│   ├── privacy.html                    # Privacy policy
+│   ├── success.html                    # Payment success page
+│   ├── teamsstaygreen.html             # Teams Stay Green eBook
+│   ├── Proposal-Manager-Resume-Lawrence-Murry.pdf
+│   ├── manifest.json                   # PWA manifest
+│   ├── sw.js                           # Service worker
+│   ├── sitemap.xml                     # XML sitemap
+│   ├── robots.txt                      # Search-engine directives
+│   └── img/                            # Images and certificates
 ├── docs/                              # Project documentation
-│
-├── index.html                         # Main website
-├── testimonials.html                  # Testimonials
-├── privacy.html                       # Privacy policy
-├── success.html                       # Payment success page
-├── teamsstaygreen.html                # Teams Stay Green eBook
-│
-├── Proposal-Manager-Resume-Lawrence-Murry.pdf
-├── manifest.json                      # PWA manifest
-├── sw.js                              # Service worker
-├── sitemap.xml                        # XML sitemap
-├── robots.txt                          # Search-engine directives
-├── _headers                            # HTTP security headers
-├── _redirects                          # Redirect rules
-├── wrangler.toml                       # Cloudflare configuration
+├── index.js                           # Worker entry point
+├── wrangler.toml                      # Cloudflare configuration
 └── README.md
