@@ -1,3 +1,4 @@
-# Ignore main HTML entry points
-index.html
-teamsstaygreen.html 
+# Ignore root-level HTML entry points.
+# The deployed site uses the files under public/.
+/index.html
+/teamsstaygreen.html
